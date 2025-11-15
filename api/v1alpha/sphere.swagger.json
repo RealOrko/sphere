@@ -14,12 +14,18 @@
     "/v1alpha/servers": {
       "get": {
         "summary": "List environment servers.",
-        "operationId": "ListServers",
+        "operationId": "SphereAPI_ListServers",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1alphaListServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -29,12 +35,18 @@
       },
       "post": {
         "summary": "Register an environment server.",
-        "operationId": "RegisterServer",
+        "operationId": "SphereAPI_RegisterServer",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1alphaRegisterServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -56,12 +68,18 @@
     "/v1alpha/servers/{id}": {
       "get": {
         "summary": "Get environment server.",
-        "operationId": "GetServer",
+        "operationId": "SphereAPI_GetServer",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1alphaGetServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -80,12 +98,18 @@
       },
       "delete": {
         "summary": "Unregister environment server.",
-        "operationId": "UnregisterServer",
+        "operationId": "SphereAPI_UnregisterServer",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1alphaUnregisterServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
             }
           }
         },
@@ -105,6 +129,39 @@
     }
   },
   "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
     "v1alphaGetServerResponse": {
       "type": "object",
       "properties": {
