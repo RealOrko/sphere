@@ -1,5 +1,6 @@
-gymnasium>=1.0.0
+gymnasium==0.28.1
 atari-py==0.2.6
+numpy>=1.21.0
 cachetools==3.1.1
 certifi==2019.11.28
 chardet==3.0.4
@@ -12,7 +13,6 @@ grpcio==1.25.0
 grpcio-status
 idna==2.8
 imageio==2.6.1
-numpy==1.17.4
 opencv-python==4.1.2.30
 Pillow==6.2.1
 protobuf==3.11.1

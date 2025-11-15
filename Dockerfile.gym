@@ -1,16 +1,29 @@
-FROM python:3.7.0
+FROM python:3.7-slim
+
+# Use archived Debian repositories since Stretch is EOL
+RUN echo "deb http://archive.debian.org/debian/ stretch main" > /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
 
 RUN apt-get update && \
-    apt-get install -y python-opengl && \
-    apt-get install -y xvfb && \
-    apt-get install -y ffmpeg && \
-    apt-get install -y libav-tools && \
-    apt-get install -y git-all
+    apt-get install -y --allow-unauthenticated \
+        python3-opengl \
+        xvfb \
+        ffmpeg \
+        git \
+        gcc \
+        python3-dev \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY . /sphere
 WORKDIR /sphere/cmd/env/gym
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN pip install "gymnasium>=1.0.0" && pip install "gymnasium[atari]" && pip install "gymnasium[box2d]"
+RUN pip install "gymnasium[atari]" && pip install "gymnasium[box2d]"
 
 RUN pip install -e ./baselines
 
