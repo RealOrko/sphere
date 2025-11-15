@@ -1,4 +1,4 @@
-FROM golang:1.13-buster
+FROM golang:1.19-bullseye
 
 RUN apt-get update && \
     apt-get install -y \
@@ -7,23 +7,21 @@ RUN apt-get update && \
     protobuf-compiler \
     libc6-dev \
     libprotobuf-dev \
-    python \
-    python-pip
+    python3 \
+    python3-pip
 
-ENV GO111MODULE on
+ENV GO111MODULE=on
 
-RUN go get github.com/uber/prototool/cmd/prototool
-RUN go get github.com/golang/protobuf/protoc-gen-go
-RUN go get google.golang.org/grpc
+RUN go install github.com/uber/prototool/cmd/prototool@v1.10.0
+RUN go install github.com/golang/protobuf/protoc-gen-go@v1.5.2
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-ENV GO111MODULE off
+ENV GO111MODULE=off
 
 RUN go get -d github.com/grpc-ecosystem/grpc-gateway/... && \
     go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway && \
     go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
-
-RUN pip install --pre grpcio
-RUN pip install --pre grpcio-tools
+RUN pip3 install grpcio grpcio-tools
 
 WORKDIR /go/src/github.com/aunum/sphere
