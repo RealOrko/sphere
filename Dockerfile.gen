@@ -8,20 +8,28 @@ RUN apt-get update && \
     libc6-dev \
     libprotobuf-dev \
     python3 \
-    python3-pip
+    python3-pip \
+    git && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV GO111MODULE=on
 
-RUN go install github.com/uber/prototool/cmd/prototool@v1.10.0
-RUN go install github.com/golang/protobuf/protoc-gen-go@v1.5.2
-RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+# Install Go protobuf tools
+RUN go install github.com/uber/prototool/cmd/prototool@v1.10.0 && \
+    go install github.com/golang/protobuf/protoc-gen-go@v1.5.2 && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-ENV GO111MODULE=off
+# Install grpc-gateway v1 (compatible with existing proto annotations)
+RUN go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.16.0 && \
+    go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@v1.16.0
 
-RUN go get -d github.com/grpc-ecosystem/grpc-gateway/... && \
-    go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway && \
-    go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+# Clone googleapis for proto dependencies
+RUN git clone https://github.com/googleapis/googleapis.git /googleapis
 
-RUN pip3 install grpcio grpcio-tools
+# Install Python gRPC tools
+RUN pip3 install --no-cache-dir grpcio grpcio-tools
 
 WORKDIR /go/src/github.com/aunum/sphere
+
+# Add googleapis to proto path
+ENV GOOGLEAPIS_DIR=/googleapis
