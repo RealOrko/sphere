@@ -10,7 +10,7 @@ RUN apt-get update && \
 COPY . /sphere
 WORKDIR /sphere/cmd/env/gym
 RUN pip install -r requirements.txt
-RUN pip install gym && pip install gym[atari] && pip install gym[box2d]
+RUN pip install "gymnasium>=1.0.0" && pip install "gymnasium[atari]" && pip install "gymnasium[box2d]"
 
 RUN pip install -e ./baselines
 

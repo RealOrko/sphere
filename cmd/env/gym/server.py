@@ -5,9 +5,9 @@ from google.protobuf.struct_pb2 import Struct
 from google.rpc import code_pb2, status_pb2, error_details_pb2
 from grpc_status import rpc_status
 from PIL import Image as Im
-import gym
+import gymnasium as gym
 import gym_BitFlipper
-from gym import wrappers
+from gymnasium import wrappers
 from baselines_ext.atari_wrapper import wrap_deepmind, NoopResetEnv, MaxAndSkipEnv
 import grpc
 import math
@@ -95,7 +95,7 @@ class EnvironmentServer(EnvironmentAPIServicer):
             info.discrete.CopyFrom(DiscreteSpace(n=space.n))
         elif name == 'Box':
             info.box.CopyFrom(BoxSpace(shape=space.shape))
-            info.box.low.extend([(x if x != -np.inf else -1e100) for x in np.array(space.low ).flatten()])
+            info.box.low.extend([(x if x != -np.inf else -1e100) for x in np.array(space.low).flatten()])
             info.box.high.extend([(x if x != +np.inf else +1e100) for x in np.array(space.high).flatten()])
         elif name == 'MultiBinary':
             info.multi_binary.CopyFrom(MultiBinarySpace(n=space.n))
@@ -133,7 +133,7 @@ class EnvironmentServer(EnvironmentAPIServicer):
 
     def ListModels(self, request, context):
         resp = []
-        for k in gym.envs.registry.env_specs:
+        for k in gym.envs.registry:
             resp.append(Model(name=k))
         return ListModelsResponse(models=resp)
 
@@ -142,19 +142,23 @@ class EnvironmentServer(EnvironmentAPIServicer):
 
     def ResetEnv(self, request, context):
         env = self.envs[request.id]
-        observation = env.reset()
+        # Gymnasium returns (observation, info) from reset
+        observation, info = env.reset()
         if not isinstance(observation, np.ndarray):
             self.logger.debug("reshaping observation to tensor")
             observation = np.array(observation)
         goal = Tensor()
         if hasattr(env, "goal"):
             goal = encode_tensor(env.goal)
+        # Note: info is returned but current protobuf may not support it yet
+        # This will need protobuf update in Phase 3
         return ResetEnvResponse(observation=encode_tensor(observation), goal=goal)
 
     def StepEnv(self, request, context):
         env = self.envs[request.id]
         env.render()
-        observation, reward, done, info = env.step(request.action)
+        # Gymnasium returns (observation, reward, terminated, truncated, info)
+        observation, reward, terminated, truncated, info = env.step(request.action)
         if not isinstance(observation, np.ndarray):
             self.logger.debug("reshaping observation to tensor")
             observation = np.array(observation)
@@ -164,6 +168,12 @@ class EnvironmentServer(EnvironmentAPIServicer):
             goal = encode_tensor(env.goal)
         s = Struct()
         s.update(info)
+        
+        # CRITICAL: For backward compatibility with current protobuf,
+        # we combine terminated OR truncated into 'done'
+        # In Phase 3, we'll update the protobuf to have separate fields
+        done = terminated or truncated
+        
         return StepEnvResponse(observation=observation,
                           reward=reward,
                           done=done,
@@ -177,7 +187,7 @@ class EnvironmentServer(EnvironmentAPIServicer):
     def RenderEnv(self, request, context):
         env = self.envs[request.id]
 
-        frame = env.render(mode='rgb_array')
+        frame = env.render()
         frame_im = Im.fromarray(frame, mode='RGB')
 
         imgByteArr = io.BytesIO()
@@ -197,7 +207,7 @@ class EnvironmentServer(EnvironmentAPIServicer):
         }
         rate = switcher.get(request.video_sampling_rate, "Invalid sample rate")
         results_dir = get_results_dir(request.id)
-        self.envs[request.id] = wrappers.Monitor(env, results_dir, force=request.force, resume=request.resume, video_callable=rate, uid=request.id, write_upon_reset=True) 
+        self.envs[request.id] = wrappers.RecordVideo(env, results_dir, episode_trigger=rate, name_prefix=request.id)
         self.record = True
         return StartRecordEnvResponse(message="recording environment")
 
