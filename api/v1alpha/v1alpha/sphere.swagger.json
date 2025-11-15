@@ -1,0 +1,246 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "v1alpha/sphere.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1alpha/servers": {
+      "get": {
+        "summary": "List environment servers.",
+        "operationId": "SphereAPI_ListServers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alphaListServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "tags": [
+          "SphereAPI"
+        ]
+      },
+      "post": {
+        "summary": "Register an environment server.",
+        "operationId": "SphereAPI_RegisterServer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alphaRegisterServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1alphaRegisterServerRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SphereAPI"
+        ]
+      }
+    },
+    "/v1alpha/servers/{id}": {
+      "get": {
+        "summary": "Get environment server.",
+        "operationId": "SphereAPI_GetServer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alphaGetServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "ID of the server.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "SphereAPI"
+        ]
+      },
+      "delete": {
+        "summary": "Unregister environment server.",
+        "operationId": "SphereAPI_UnregisterServer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1alphaUnregisterServerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "ID of the server.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "SphereAPI"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "typeUrl": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1alphaGetServerResponse": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "$ref": "#/definitions/v1alphaServer",
+          "description": "Server retrieved."
+        }
+      },
+      "description": "Response from getting a server."
+    },
+    "v1alphaListServerResponse": {
+      "type": "object",
+      "properties": {
+        "servers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1alphaServer"
+          },
+          "description": "Servers from listing."
+        }
+      },
+      "description": "Response from listing servers."
+    },
+    "v1alphaRegisterServerRequest": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "$ref": "#/definitions/v1alphaServer",
+          "description": "Server to register."
+        }
+      },
+      "description": "Request to register a server."
+    },
+    "v1alphaRegisterServerResponse": {
+      "type": "object",
+      "properties": {
+        "server": {
+          "$ref": "#/definitions/v1alphaServer",
+          "description": "Server registered."
+        }
+      },
+      "description": "Response from registering a server."
+    },
+    "v1alphaServer": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the server."
+        },
+        "address": {
+          "type": "string",
+          "description": "Address of the server."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the server."
+        },
+        "createdTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time when the server was created."
+        },
+        "id": {
+          "type": "string",
+          "description": "ID of the server."
+        }
+      },
+      "description": "An environment server."
+    },
+    "v1alphaUnregisterServerResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Message from unregistering a server."
+        }
+      },
+      "description": "Response from unregister a server."
+    }
+  }
+}
